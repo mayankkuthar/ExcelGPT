@@ -26,8 +26,8 @@ app = FastAPI(title="ExcelGPT API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins for testing
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=False,  # Must be False when using allow_origins=["*"]
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
