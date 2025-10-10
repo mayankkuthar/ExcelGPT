@@ -12,6 +12,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Connecting...');
+  const wsRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -23,30 +24,91 @@ function App() {
   }, [messages]);
 
   useEffect(() => {
-    // Check backend health on component mount
-    checkBackendHealth();
-  }, []);
-
-  const checkBackendHealth = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/health`);
-      const data = await response.json();
+    const connectWebSocket = () => {
+      const clientId = Math.random().toString(36).substr(2, 9);
+      const ws = new WebSocket(`${API_BASE_URL.replace('http', 'ws')}/ws/${clientId}`);
       
-      if (data.status === 'healthy' && data.excelgpt_initialized) {
+      wsRef.current = ws;
+
+      ws.onopen = () => {
         setIsConnected(true);
         setConnectionStatus('Connected to ExcelGPT');
-      } else {
+        console.log('WebSocket connected');
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleWebSocketMessage(data);
+      };
+
+      ws.onclose = () => {
         setIsConnected(false);
-        setConnectionStatus('Backend not ready');
+        setConnectionStatus('Disconnected');
+        console.log('WebSocket disconnected');
+        // Attempt to reconnect after 3 seconds
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setConnectionStatus('Connection error');
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
       }
-    } catch (error) {
-      setIsConnected(false);
-      setConnectionStatus('Connection failed');
-      console.error('Health check failed:', error);
+    };
+  }, []);
+
+  const handleWebSocketMessage = (data) => {
+    switch (data.type) {
+      case 'status':
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          type: 'status',
+          content: data.message,
+          timestamp: data.timestamp
+        }]);
+        break;
+      
+      case 'result':
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          type: 'result',
+          content: data.insights,
+          dataOutput: data.data_output,
+          generatedCode: data.generated_code,
+          query: data.query,
+          timestamp: data.timestamp
+        }]);
+        setIsLoading(false);
+        break;
+      
+      case 'error':
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          type: 'error',
+          content: data.message,
+          generatedCode: data.generated_code,
+          timestamp: data.timestamp
+        }]);
+        setIsLoading(false);
+        break;
+      
+      case 'pong':
+        // Handle ping response
+        break;
+      
+      default:
+        console.log('Unknown message type:', data.type);
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!inputValue.trim() || !isConnected || isLoading) return;
 
     const userMessage = {
@@ -60,120 +122,13 @@ function App() {
     setInputValue('');
     setIsLoading(true);
 
-    try {
-      // Submit query
-      const submitResponse = await fetch(`${API_BASE_URL}/api/query`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: inputValue }),
-      });
-
-      const { request_id } = await submitResponse.json();
-
-      // Add processing message
-      const processingMessage = {
-        id: Date.now() + 1,
-        type: 'status',
-        content: '🤖 Processing your query...',
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, processingMessage]);
-
-      // Poll for results
-      await pollForResult(request_id);
-
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setMessages(prev => [...prev, {
-        id: Date.now(),
-        type: 'error',
-        content: `Failed to send message: ${error.message}`,
-        timestamp: new Date().toISOString()
-      }]);
-      setIsLoading(false);
+    // Send message via WebSocket
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'query',
+        query: inputValue
+      }));
     }
-  };
-
-  const pollForResult = async (requestId) => {
-    const maxAttempts = 30; // 30 seconds max
-    let attempts = 0;
-
-    const poll = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/result/${requestId}`);
-        const result = await response.json();
-
-        if (result.status === 'completed') {
-          // Remove processing message and add result
-          setMessages(prev => {
-            const filtered = prev.filter(msg => msg.type !== 'status');
-            return [...filtered, {
-              id: Date.now(),
-              type: 'result',
-              content: result.insights,
-              dataOutput: result.data_output,
-              generatedCode: result.generated_code,
-              query: result.query,
-              timestamp: result.timestamp
-            }];
-          });
-          setIsLoading(false);
-        } else if (result.status === 'error') {
-          // Remove processing message and add error
-          setMessages(prev => {
-            const filtered = prev.filter(msg => msg.type !== 'status');
-            return [...filtered, {
-              id: Date.now(),
-              type: 'error',
-              content: result.message,
-              generatedCode: result.generated_code,
-              timestamp: result.timestamp
-            }];
-          });
-          setIsLoading(false);
-        } else if (result.status === 'processing') {
-          // Update processing message
-          setMessages(prev => prev.map(msg => 
-            msg.type === 'status' 
-              ? { ...msg, content: result.message }
-              : msg
-          ));
-          
-          // Continue polling
-          attempts++;
-          if (attempts < maxAttempts) {
-            setTimeout(poll, 1000); // Poll every second
-          } else {
-            setMessages(prev => {
-              const filtered = prev.filter(msg => msg.type !== 'status');
-              return [...filtered, {
-                id: Date.now(),
-                type: 'error',
-                content: 'Request timed out. Please try again.',
-                timestamp: new Date().toISOString()
-              }];
-            });
-            setIsLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error('Error polling for result:', error);
-        setMessages(prev => {
-          const filtered = prev.filter(msg => msg.type !== 'status');
-          return [...filtered, {
-            id: Date.now(),
-            type: 'error',
-            content: `Error getting result: ${error.message}`,
-            timestamp: new Date().toISOString()
-          }];
-        });
-        setIsLoading(false);
-      }
-    };
-
-    poll();
   };
 
   const handleKeyPress = (e) => {

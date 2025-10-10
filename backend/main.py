@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import json
@@ -25,34 +25,20 @@ app = FastAPI(title="ExcelGPT API", version="1.0.0")
 # CORS middleware for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://your-vercel-app.vercel.app"],
+    allow_origins=["*"],  # Allow all origins for testing
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Global variables for managing connections and data
-class ConnectionManager:
+# Global variables for managing data
+class AnalysisManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
         self.config: Optional[Config] = None
         self.data_loader: Optional[DataLoader] = None
         self.agent: Optional[InsightsAgent] = None
         self.initialized = False
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
+        self.analysis_results = {}  # Store results by request_id
 
     async def initialize_excelgpt(self):
         """Initialize ExcelGPT components"""
@@ -76,7 +62,67 @@ class ConnectionManager:
             print(f"Initialization error: {e}")
             return False
 
-manager = ConnectionManager()
+    async def process_query(self, query: str, request_id: str):
+        """Process a query and store results"""
+        if not self.initialized:
+            self.analysis_results[request_id] = {
+                "status": "error",
+                "message": "ExcelGPT not initialized"
+            }
+            return
+
+        try:
+            # Store initial status
+            self.analysis_results[request_id] = {
+                "status": "processing",
+                "message": "🤖 Generating analysis code...",
+                "query": query
+            }
+
+            # Prepare context strings
+            db_summary_str = json.dumps(self.data_loader.db_summary, indent=2)
+            kpi_mapping_str = json.dumps(self.data_loader.kpi_mapping, indent=2)
+
+            # Generate code
+            generated_code = self.agent.generate_analysis_code(query, db_summary_str, kpi_mapping_str)
+            
+            # Update status
+            self.analysis_results[request_id]["message"] = "⚡ Executing analysis..."
+
+            # Execute the code
+            result = await execute_analysis_code(generated_code)
+            
+            if result["success"]:
+                # Generate insights
+                self.analysis_results[request_id]["message"] = "📊 Generating insights..."
+                insights = self.agent.generate_insight_summary(result["output"], query)
+                
+                # Store final result
+                self.analysis_results[request_id] = {
+                    "status": "completed",
+                    "query": query,
+                    "data_output": result["output"],
+                    "insights": insights,
+                    "generated_code": generated_code,
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                # Store error result
+                self.analysis_results[request_id] = {
+                    "status": "error",
+                    "message": result["error"],
+                    "generated_code": generated_code,
+                    "timestamp": datetime.now().isoformat()
+                }
+
+        except Exception as e:
+            self.analysis_results[request_id] = {
+                "status": "error",
+                "message": f"Analysis failed: {str(e)}",
+                "timestamp": datetime.now().isoformat()
+            }
+
+manager = AnalysisManager()
 
 @app.on_event("startup")
 async def startup_event():
@@ -110,117 +156,33 @@ async def get_data_info():
         "dataset_shape": manager.data_loader.df.shape,
         "columns": list(manager.data_loader.df.columns),
         "contexts": list(manager.data_loader.kpi_mapping.keys()),
-        "brands": manager.data_loader.df['Brand'].unique().tolist()[:10],  # First 10 brands
+        "brands": manager.data_loader.df['Brand'].unique().tolist()[:10],
         "time_periods": manager.data_loader.df['Time_Period'].unique().tolist()
     }
 
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    await manager.connect(websocket)
-    try:
-        while True:
-            # Wait for messages from client
-            data = await websocket.receive_text()
-            message_data = json.loads(data)
-            
-            if message_data.get("type") == "query":
-                await handle_analysis_query(websocket, message_data.get("query", ""))
-            elif message_data.get("type") == "ping":
-                await manager.send_personal_message(json.dumps({"type": "pong"}), websocket)
-                
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+@app.post("/api/query")
+async def submit_query(request: dict):
+    """Submit a query for analysis"""
+    query = request.get("query", "")
+    request_id = str(uuid.uuid4())
+    
+    if not query:
+        raise HTTPException(status_code=400, detail="Query is required")
+    
+    # Start processing in background
+    asyncio.create_task(manager.process_query(query, request_id))
+    
+    return {"request_id": request_id, "status": "submitted"}
 
-async def handle_analysis_query(websocket: WebSocket, query: str):
-    """Handle analysis query from client"""
-    if not manager.initialized:
-        await manager.send_personal_message(
-            json.dumps({
-                "type": "error",
-                "message": "ExcelGPT not initialized. Please try again."
-            }), 
-            websocket
-        )
-        return
+@app.get("/api/result/{request_id}")
+async def get_result(request_id: str):
+    """Get the result of a query"""
+    if request_id not in manager.analysis_results:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    return manager.analysis_results[request_id]
 
-    try:
-        # Send initial response
-        await manager.send_personal_message(
-            json.dumps({
-                "type": "status",
-                "message": "🤖 Generating analysis code...",
-                "timestamp": datetime.now().isoformat()
-            }), 
-            websocket
-        )
-
-        # Prepare context strings
-        db_summary_str = json.dumps(manager.data_loader.db_summary, indent=2)
-        kpi_mapping_str = json.dumps(manager.data_loader.kpi_mapping, indent=2)
-
-        # Generate code
-        generated_code = manager.agent.generate_analysis_code(query, db_summary_str, kpi_mapping_str)
-        
-        await manager.send_personal_message(
-            json.dumps({
-                "type": "status",
-                "message": "⚡ Executing analysis...",
-                "timestamp": datetime.now().isoformat()
-            }), 
-            websocket
-        )
-
-        # Execute the code
-        result = await execute_analysis_code(generated_code, websocket)
-        
-        if result["success"]:
-            # Generate insights
-            await manager.send_personal_message(
-                json.dumps({
-                    "type": "status",
-                    "message": "📊 Generating insights...",
-                    "timestamp": datetime.now().isoformat()
-                }), 
-                websocket
-            )
-            
-            insights = manager.agent.generate_insight_summary(result["output"], query)
-            
-            # Send final result
-            await manager.send_personal_message(
-                json.dumps({
-                    "type": "result",
-                    "query": query,
-                    "data_output": result["output"],
-                    "insights": insights,
-                    "generated_code": generated_code,
-                    "timestamp": datetime.now().isoformat()
-                }), 
-                websocket
-            )
-        else:
-            # Send error result
-            await manager.send_personal_message(
-                json.dumps({
-                    "type": "error",
-                    "message": result["error"],
-                    "generated_code": generated_code,
-                    "timestamp": datetime.now().isoformat()
-                }), 
-                websocket
-            )
-
-    except Exception as e:
-        await manager.send_personal_message(
-            json.dumps({
-                "type": "error",
-                "message": f"Analysis failed: {str(e)}",
-                "timestamp": datetime.now().isoformat()
-            }), 
-            websocket
-        )
-
-async def execute_analysis_code(code: str, websocket: WebSocket):
+async def execute_analysis_code(code: str):
     """Execute the generated analysis code"""
     try:
         # Create a temporary file for the code
