@@ -4,7 +4,10 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+// Use CORS proxy to bypass CORS issues
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+const PROXIED_API_URL = CORS_PROXY + encodeURIComponent(API_BASE_URL);
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -29,7 +32,7 @@ function App() {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/health`);
+      const response = await fetch(`${PROXIED_API_URL}/health`);
       const data = await response.json();
       
       if (data.status === 'healthy' && data.excelgpt_initialized) {
@@ -62,7 +65,7 @@ function App() {
 
     try {
       // Submit query
-      const submitResponse = await fetch(`${API_BASE_URL}/api/query`, {
+      const submitResponse = await fetch(`${PROXIED_API_URL}/api/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +105,7 @@ function App() {
 
     const poll = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/result/${requestId}`);
+        const response = await fetch(`${PROXIED_API_URL}/api/result/${requestId}`);
         const result = await response.json();
 
         if (result.status === 'completed') {
