@@ -1,0 +1,273 @@
+{
+    "Affinity": [
+        "-3 I hate it",
+        "B2B",
+        "-1",
+        "-2",
+        " Neutral",
+        "Standard Error",
+        "1",
+        "2",
+        "+3 I love it",
+        "Standard Deviation",
+        "T2B",
+        "Unweighted Base",
+        "Mean",
+        "Weighted Base",
+        "Effective Base"
+    ],
+    "Age Bands": [
+        "Do not wish to answer",
+        "25 - 34 Years",
+        "18 - 24 Years",
+        "Younger than 18 years",
+        "Under 35 (NET)",
+        "35+ (NET)",
+        "35 - 49 Years",
+        "5+ Years",
+        "Unweighted Base"
+    ],
+    "Brand Equity": [
+        "Power",
+        "Meaningful",
+        "Different",
+        "Salient"
+    ],
+    "Brand Image Profiles (excluding any negative statements)": [
+        "Based on Aware of brand",
+        "Weighted base",
+        "Effective sample size",
+        "Have the perfect softness",
+        "Are better quality than other brands",
+        "Are the expert bakers",
+        "Offer healthier choices",
+        "Bring loved ones together",
+        "Have nutritious options",
+        "Are the freshest bread",
+        "Have the right size pack for the family",
+        "Are wholesome and nutritious",
+        "Keep up with the times",
+        "Are always adding new flavours and products",
+        "Are good value for money",
+        "Care about communities"
+    ],
+    "Consumer Typology": [
+        "Summary: Brand Loyal/Repertoire",
+        "Brand Loyal",
+        "Repertoire",
+        "Price Driven",
+        "Effective sample size"
+    ],
+    "Demand Power Index": [
+        "Demand Power Index (for cross-study comparisons. recommended)"
+    ],
+    "Demand Power Regression": [
+        "Meaningful",
+        "Different",
+        "Salient",
+        "R-squared"
+    ],
+    "Dynamic": [
+        "3",
+        "2",
+        "1 Follows others",
+        "Standard Deviation",
+        "4",
+        "5",
+        "Standard Error",
+        "6",
+        "7 Sets the trends",
+        "Unweighted Base",
+        "Effective Base",
+        "Weighted Base",
+        "Mean"
+    ],
+    "ETH. Ethnic Group": [
+        "Prefer not to answer",
+        "Black",
+        "White",
+        "Coloured",
+        "Indian/Asian",
+        "WCI (NET)",
+        "Unweighted Base"
+    ],
+    "Familiarity": [
+        "Prompted Awareness Summary",
+        "Trial Summary",
+        "Regular Usage Summary",
+        "Most Often Usage Summary",
+        "First Choice Consideration Summary"
+    ],
+    "Gender": [
+        "Male",
+        "Female",
+        "Unweighted Base"
+    ],
+    "Imagery": [
+        "Have nutritious options",
+        "None of these",
+        "Care about communities",
+        "Are good value for money",
+        "Are always adding new flavours and products",
+        "Have the perfect softness",
+        "Keep up with the times",
+        "Are wholesome and nutritious",
+        "Are the freshest bread",
+        "Offer healthier choices",
+        "Are better quality than other brands",
+        "Bring loved ones together",
+        "Are the expert bakers",
+        "Have the right size pack for the family",
+        "Unweighted Base",
+        "Weighted Base",
+        "Effective Base"
+    ],
+    "MHI. Household Income": [
+        "Don't know",
+        "No household income",
+        "R52 1 - R6 ",
+        "R38 1 - R45 ",
+        "R45 1 - R52 ",
+        "R31 1 - R38 ",
+        "Less than 3K",
+        "More than R6 ",
+        "R24 1 - R31 ",
+        "R17 1 - R24 ",
+        "R1 1 - R17 ",
+        "R3 1 - R1 ",
+        "R 24K+",
+        "Up to 24K (NET)",
+        "Unweighted Base"
+    ],
+    "Market factors - Share flow": [
+        "Demand Power (share)",
+        "Is the most affordable",
+        "Is always available where I normally shop",
+        "You see and hear about it everywhere",
+        "Is easiest to find in-store",
+        "It was on promotion",
+        "It comes in all the pack sizes I need",
+        "It offers a wide variety in its product range",
+        "The packaging was most appealing",
+        "It had its own special display in-store",
+        "It was recommended by friends or family",
+        "Is a brand I always buy",
+        "Other Facilitators",
+        "Claimed market share"
+    ],
+    "Meets Needs": [
+        "Standard Deviation",
+        "2",
+        "1 Doesn't meet your needs at all",
+        "3",
+        "4",
+        "5",
+        "Standard Error",
+        "6",
+        "7 Meets your needs very well",
+        "Unweighted Base",
+        "Effective Base",
+        "Weighted Base",
+        "Mean"
+    ],
+    "PRV. Province": [
+        "Free State",
+        "Mpumalanga",
+        "Limpopo",
+        "North West",
+        "Western Cape",
+        "Eastern Cape",
+        "Gauteng",
+        "NWLPMP (NET)",
+        "KZN",
+        "Unweighted Base"
+    ],
+    "Price": [
+        "2",
+        "3",
+        "1 Costs the least",
+        "4",
+        "5",
+        "Standard Error",
+        "6",
+        "7 Costs the most",
+        "T3B",
+        "Unweighted Base",
+        "Standard Deviation",
+        "Weighted Base",
+        "Effective Base",
+        "Mean"
+    ],
+    "Pricing Power Regression": [
+        "Meaningful",
+        "Different",
+        "Salient",
+        "R-squared"
+    ],
+    "Respondent Sample Size": [
+        "Based on Total Sample",
+        "Weighted base",
+        "Effective sample size"
+    ],
+    "SSEM_OUTPUT5. 5 Supergroup SEM output": [
+        "Supergroup 1",
+        "Supergroup 2",
+        "Supergroup 5",
+        "Supergroup 4",
+        "Supergroup 3",
+        "Mass market (NET)",
+        "Unweighted Base"
+    ],
+    "Total Brand Communication Awareness - Media": [
+        "Somewhere else",
+        "Not seen/heard",
+        "Out of home",
+        "Sponsorships",
+        "Events",
+        "Radio",
+        "Searching on-line",
+        "Magazine or newspaper",
+        "Social media",
+        "Word of mouth",
+        "Promos. competitions. spec. offers",
+        "Broadsheets",
+        "TV",
+        "In a shop/store",
+        "TBCA (NET)",
+        "Unweighted Base",
+        "Weighted Base",
+        "Effective Base"
+    ],
+    "Unaided Awareness - First Mention": [
+        "Unaided Awareness - First Mention"
+    ],
+    "Unaided Awareness - Total Mentions": [
+        "Unaided Awareness - Total Mentions"
+    ],
+    "Unique": [
+        "2",
+        "3",
+        "5",
+        "4",
+        "1 Exactly the same",
+        "Standard Error",
+        "6",
+        "7 Very different",
+        "Unweighted Base",
+        "Effective Base",
+        "Weighted Base",
+        "Standard Deviation",
+        "Mean"
+    ],
+    "Worth": [
+        "Standard Error",
+        "Worth less than it costs (1)",
+        "Worth more than it costs (3)",
+        "Worth what it costs (2)",
+        "Standard Deviation",
+        "Unweighted Base",
+        "Mean",
+        "Effective Base",
+        "Weighted Base"
+    ]
+}
