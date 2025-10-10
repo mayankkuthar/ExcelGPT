@@ -51,8 +51,11 @@ Before deploying, make sure you have:
 
 3. **Configure Environment Variables**:
    - In project settings, go to "Environment Variables"
-   - Add: `GOOGLE_API_KEY` = `your_gemini_api_key`
-   - Add: `PYTHON_VERSION` = `3.9`
+   - Click "Add New"
+   - **Name**: `GOOGLE_API_KEY`
+   - **Value**: `your_actual_gemini_api_key_here`
+   - **Environment**: Production, Preview, Development (select all)
+   - Click "Save"
 
 4. **Deploy**:
    - Click "Deploy"
@@ -70,7 +73,11 @@ Before deploying, make sure you have:
    - **Output Directory**: `build`
 
 2. **Configure Environment Variables**:
-   - Add: `REACT_APP_API_URL` = `your_backend_url_from_step_2`
+   - Click "Add New"
+   - **Name**: `REACT_APP_API_URL`
+   - **Value**: `https://your-backend-project-name.vercel.app`
+   - **Environment**: Production, Preview, Development (select all)
+   - Click "Save"
 
 3. **Deploy**:
    - Click "Deploy"
