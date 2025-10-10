@@ -28,6 +28,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://excel-gpt-insight-96kkvef5b-mayank-kuthar.vercel.app",
+        "https://excel-gpt-insight-55urplkq0-mayank-kuthars-projects.vercel.app",
         "https://excel-gpt-frontend.vercel.app",
         "https://excelgpt-frontend.vercel.app",
         "https://*.vercel.app"  # Allow all Vercel apps
