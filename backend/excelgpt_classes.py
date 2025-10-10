@@ -17,13 +17,40 @@ class Config:
         load_dotenv()
         self.api_key: Optional[str] = os.getenv("GOOGLE_API_KEY")
         self.model_name: str = "gemini-2.5-flash"
-        self.data_file_path: Path = Path("CONSOLIDATED_OUTPUT_DATA.csv")
-        self.db_summary_path: Path = Path("db_summary.json")
-        self.kpi_mapping_path: Path = Path("context_kpi_mapping.json")
+        # Try multiple possible paths for the data files
+        possible_paths = [
+            Path("CONSOLIDATED_OUTPUT_DATA.csv"),
+            Path("../CONSOLIDATED_OUTPUT_DATA.csv"),
+            Path("/tmp/CONSOLIDATED_OUTPUT_DATA.csv"),
+        ]
+        self.data_file_path = self._find_file(possible_paths, "CONSOLIDATED_OUTPUT_DATA.csv")
+        
+        possible_summary_paths = [
+            Path("db_summary.json"),
+            Path("../db_summary.json"),
+            Path("/tmp/db_summary.json"),
+        ]
+        self.db_summary_path = self._find_file(possible_summary_paths, "db_summary.json")
+        
+        possible_mapping_paths = [
+            Path("context_kpi_mapping.json"),
+            Path("../context_kpi_mapping.json"),
+            Path("/tmp/context_kpi_mapping.json"),
+        ]
+        self.kpi_mapping_path = self._find_file(possible_mapping_paths, "context_kpi_mapping.json")
         self.queries_file_path: Path = Path("User Queries.xlsx")
         self.output_dir: Path = Path("copilot_runs")
         self.output_dir.mkdir(exist_ok=True)
         self.max_retries: int = 2
+
+    def _find_file(self, possible_paths, filename):
+        """Find a file in multiple possible locations"""
+        for path in possible_paths:
+            if path.exists():
+                print(f"✅ Found {filename} at: {path}")
+                return path
+        print(f"❌ Could not find {filename} in any of these locations: {possible_paths}")
+        return possible_paths[0]  # Return the first path as fallback
 
     def validate(self):
         """Validates the configuration, especially the API key."""

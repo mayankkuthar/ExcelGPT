@@ -53,20 +53,32 @@ class AnalysisManager:
             return True
             
         try:
+            print("🚀 Starting ExcelGPT initialization...")
             self.config = Config()
+            print("✅ Config created")
+            
             self.config.validate()
+            print("✅ API key validated")
             
             self.data_loader = DataLoader(self.config)
+            print("✅ DataLoader created")
+            
             success = self.data_loader.load_all()
+            print(f"✅ Data loading result: {success}")
             
             if success:
                 self.agent = InsightsAgent(self.config)
                 self.initialized = True
+                print("✅ ExcelGPT fully initialized!")
                 return True
             else:
+                print("❌ Data loading failed")
                 return False
         except Exception as e:
-            print(f"Initialization error: {e}")
+            print(f"❌ Initialization error: {e}")
+            print(f"❌ Error type: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
             return False
 
     async def process_query(self, query: str, request_id: str):
