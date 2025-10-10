@@ -25,8 +25,14 @@ app = FastAPI(title="ExcelGPT API", version="1.0.0")
 # CORS middleware for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for testing
-    allow_credentials=False,  # Must be False when using allow_origins=["*"]
+    allow_origins=[
+        "http://localhost:3000",
+        "https://excel-gpt-insight-96kkvef5b-mayank-kuthar.vercel.app",
+        "https://excel-gpt-frontend.vercel.app",
+        "https://excelgpt-frontend.vercel.app",
+        "https://*.vercel.app"  # Allow all Vercel apps
+    ],
+    allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
