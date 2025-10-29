@@ -44,8 +44,13 @@ class AnalysisManager:
         self.config: Optional[Config] = None
         self.data_loader: Optional[DataLoader] = None
         self.agent: Optional[InsightsAgent] = None
+        # Initialization state: not_started | in_progress | completed | failed
         self.initialized = False
+        self.init_status: str = "not_started"
+        self.init_started_at: Optional[str] = None
+        self.init_completed_at: Optional[str] = None
         self.init_error: Optional[str] = None
+        self.init_traceback: Optional[str] = None
         self.analysis_results = {}  # Store results by request_id
 
     async def initialize_excelgpt(self):
@@ -54,6 +59,12 @@ class AnalysisManager:
             return True
             
         try:
+            import traceback as _tb
+            from datetime import datetime as _dt
+            # mark as in-progress
+            self.init_status = "in_progress"
+            self.init_started_at = _dt.now().isoformat()
+
             print("🚀 Starting ExcelGPT initialization...")
             self.config = Config()
             print("✅ Config created")
@@ -70,20 +81,29 @@ class AnalysisManager:
             if success:
                 self.agent = InsightsAgent(self.config)
                 self.initialized = True
+                self.init_status = "completed"
+                self.init_completed_at = _dt.now().isoformat()
                 self.init_error = None
+                self.init_traceback = None
                 print("✅ ExcelGPT fully initialized!")
                 return True
             else:
+                self.init_status = "failed"
+                self.init_completed_at = _dt.now().isoformat()
                 self.init_error = "Data loading failed"
                 print("❌ Data loading failed")
                 return False
         except Exception as e:
-            # Store the error message for health checks and debugging
+            # Store the error message and traceback for health checks and debugging
+            import traceback as _tb
+            from datetime import datetime as _dt
+            self.init_status = "failed"
+            self.init_completed_at = _dt.now().isoformat()
             self.init_error = f"{type(e).__name__}: {str(e)}"
+            self.init_traceback = _tb.format_exc()
             print(f"❌ Initialization error: {e}")
             print(f"❌ Error type: {type(e).__name__}")
-            import traceback
-            traceback.print_exc()
+            _tb.print_exc()
             return False
 
     async def process_query(self, query: str, request_id: str):
@@ -167,12 +187,36 @@ async def health_check():
     resp = {
         "status": "healthy",
         "excelgpt_initialized": manager.initialized,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
+        # expose init diagnostics
+        "initialization_status": getattr(manager, "init_status", None),
+        "initialization_started_at": getattr(manager, "init_started_at", None),
+        "initialization_completed_at": getattr(manager, "init_completed_at", None),
+        "initialization_error": getattr(manager, "init_error", None),
     }
-    # If initialization hasn't completed, include the error/reason if available
-    if not manager.initialized:
-        resp["initialization_error"] = manager.init_error
+    # include traceback only when failed (may be verbose)
+    if getattr(manager, "init_status", None) == "failed":
+        resp["initialization_traceback"] = getattr(manager, "init_traceback", None)
     return resp
+
+
+@app.post("/init")
+async def trigger_init():
+    """Trigger initialization manually and return the outcome (for diagnostics)."""
+    # If already initialized, return current status
+    if manager.initialized:
+        return {"ok": True, "message": "Already initialized", "initialization_status": manager.init_status}
+
+    # Run initialization and wait for result (useful for debugging)
+    success = await manager.initialize_excelgpt()
+    return {
+        "ok": bool(success),
+        "initialization_status": manager.init_status,
+        "initialization_error": manager.init_error,
+        "initialization_started_at": manager.init_started_at,
+        "initialization_completed_at": manager.init_completed_at,
+        "initialization_traceback": manager.init_traceback if manager.init_status == "failed" else None,
+    }
 
 @app.get("/data/info")
 async def get_data_info():
