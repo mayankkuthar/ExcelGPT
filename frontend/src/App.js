@@ -4,10 +4,16 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-// Use CORS proxy to bypass CORS issues
+// API base and optional CORS proxy handling
+// In development we talk to the local backend directly (no proxy).
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
-const PROXIED_API_URL = CORS_PROXY + encodeURIComponent(API_BASE_URL);
+// Use direct backend in development to avoid relying on public CORS proxies that
+// cannot access localhost. In production you can enable the proxy by setting
+// REACT_APP_USE_PROXY=true in the environment.
+const PROXIED_API_URL = (process.env.NODE_ENV === 'development')
+  ? API_BASE_URL
+  : (process.env.REACT_APP_USE_PROXY === 'true' ? CORS_PROXY + encodeURIComponent(API_BASE_URL) : API_BASE_URL);
 
 function App() {
   const [messages, setMessages] = useState([]);
