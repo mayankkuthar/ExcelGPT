@@ -90,7 +90,23 @@ class AnalysisManager:
             else:
                 self.init_status = "failed"
                 self.init_completed_at = _dt.now().isoformat()
-                self.init_error = "Data loading failed"
+                # Capture detailed loader diagnostics when available
+                loader_err = None
+                loader_tb = None
+                try:
+                    loader_err = getattr(self.data_loader, "last_error", None)
+                    loader_tb = getattr(self.data_loader, "last_traceback", None)
+                except Exception:
+                    loader_err = None
+                    loader_tb = None
+
+                if loader_err:
+                    self.init_error = f"Data loading failed: {loader_err}"
+                    self.init_traceback = loader_tb
+                else:
+                    self.init_error = "Data loading failed"
+                    self.init_traceback = None
+
                 print("❌ Data loading failed")
                 return False
         except Exception as e:

@@ -81,6 +81,9 @@ class DataLoader:
         self.df: Optional[pd.DataFrame] = None
         self.db_summary: Optional[Dict] = None
         self.kpi_mapping: Optional[Dict] = None
+        # Diagnostics for load failures
+        self.last_error: Optional[str] = None
+        self.last_traceback: Optional[str] = None
 
     def load_all(self) -> bool:
         """Loads all data sources and returns True if successful."""
@@ -100,13 +103,23 @@ class DataLoader:
             with open(self.config.kpi_mapping_path, "r") as f:
                 self.kpi_mapping = json.load(f)
             print("✅ Successfully loaded KPI mapping.")
+            # Clear any previous diagnostics
+            self.last_error = None
+            self.last_traceback = None
             return True
-
         except FileNotFoundError as e:
+            err = f"FileNotFoundError: {e.filename}"
             print(f"❌ ERROR: A required file was not found: {e.filename}")
+            import traceback as _tb
+            self.last_error = err
+            self.last_traceback = _tb.format_exc()
             return False
         except Exception as e:
+            err = f"{type(e).__name__}: {str(e)}"
             print(f"❌ An error occurred during data loading: {e}")
+            import traceback as _tb
+            self.last_error = err
+            self.last_traceback = _tb.format_exc()
             return False
 
 
