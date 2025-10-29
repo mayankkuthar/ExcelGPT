@@ -45,6 +45,7 @@ class AnalysisManager:
         self.data_loader: Optional[DataLoader] = None
         self.agent: Optional[InsightsAgent] = None
         self.initialized = False
+        self.init_error: Optional[str] = None
         self.analysis_results = {}  # Store results by request_id
 
     async def initialize_excelgpt(self):
@@ -69,12 +70,16 @@ class AnalysisManager:
             if success:
                 self.agent = InsightsAgent(self.config)
                 self.initialized = True
+                self.init_error = None
                 print("✅ ExcelGPT fully initialized!")
                 return True
             else:
+                self.init_error = "Data loading failed"
                 print("❌ Data loading failed")
                 return False
         except Exception as e:
+            # Store the error message for health checks and debugging
+            self.init_error = f"{type(e).__name__}: {str(e)}"
             print(f"❌ Initialization error: {e}")
             print(f"❌ Error type: {type(e).__name__}")
             import traceback
@@ -159,11 +164,15 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {
+    resp = {
         "status": "healthy",
         "excelgpt_initialized": manager.initialized,
         "timestamp": datetime.now().isoformat()
     }
+    # If initialization hasn't completed, include the error/reason if available
+    if not manager.initialized:
+        resp["initialization_error"] = manager.init_error
+    return resp
 
 @app.get("/data/info")
 async def get_data_info():
