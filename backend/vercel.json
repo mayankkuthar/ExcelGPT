@@ -15,7 +15,5 @@
       "dest": "main.py"
     }
   ],
-  "env": {
-    "GOOGLE_API_KEY": ""
-  }
+  
 }
