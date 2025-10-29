@@ -17,6 +17,10 @@ class Config:
         load_dotenv()
         self.api_key: Optional[str] = os.getenv("GOOGLE_API_KEY")
         self.model_name: str = "gemini-2.5-flash"
+
+        # Detect Vercel environment to handle filesystem restrictions
+        self.is_vercel = os.getenv('VERCEL', '0') == '1'
+
         # Try multiple possible paths for the data files
         possible_paths = [
             Path("CONSOLIDATED_OUTPUT_DATA.csv"),
@@ -38,9 +42,15 @@ class Config:
             Path("/tmp/context_kpi_mapping.json"),
         ]
         self.kpi_mapping_path = self._find_file(possible_mapping_paths, "context_kpi_mapping.json")
-        self.queries_file_path: Path = Path("User Queries.xlsx")
-        self.output_dir: Path = Path("copilot_runs")
-        self.output_dir.mkdir(exist_ok=True)
+
+        # Use /tmp for writable paths in Vercel, local paths otherwise
+        base_dir = Path("/tmp" if self.is_vercel else ".")
+        self.queries_file_path: Path = base_dir / "User Queries.xlsx"
+        self.output_dir: Path = base_dir / "copilot_runs"
+        # Only try to create directory if we're not in Vercel (it creates /tmp automatically)
+        if not self.is_vercel:
+            self.output_dir.mkdir(exist_ok=True)
+
         self.max_retries: int = 2
 
     def _find_file(self, possible_paths, filename):
