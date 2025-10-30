@@ -6,7 +6,7 @@ import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // API base and optional CORS proxy handling
 // In development we talk to the local backend directly (no proxy).
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://excel-gpt-zeta.vercel.app';
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 // Use direct backend in development to avoid relying on public CORS proxies that
 // cannot access localhost. In production you can enable the proxy by setting
