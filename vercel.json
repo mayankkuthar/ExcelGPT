@@ -12,7 +12,12 @@
       "src": "backend/main.py",
       "use": "@vercel/python",
       "config": {
-        "maxDuration": 60
+        "maxDuration": 60,
+        "includeFiles": [
+          "backend/CONSOLIDATED_OUTPUT_DATA.csv",
+          "backend/db_summary.json",
+          "backend/context_kpi_mapping.json"
+        ]
       }
     }
   ],

@@ -1,0 +1,110 @@
+{
+    "tables": [
+        {
+            "name": "CONSOLIDATED_OUTPUT_DATA",
+            "columns": [
+                {
+                    "name": "Brand",
+                    "type": "object",
+                    "unique_values": [
+                        "Albany",
+                        "Sasko",
+                        "Blue Ribbon",
+                        "Sunbake",
+                        "BB Bakery",
+                        "Spar",
+                        "Shoprite",
+                        "Pick n Pay",
+                        "Checkers",
+                        "Shop's own brand",
+                        "Sunshine",
+                        "Futurelife",
+                        "Shoprite (the bakery) Packaged bread",
+                        "Checkers (the bakery) Packaged bread"
+                    ]
+                },
+                {
+                    "name": "Context",
+                    "type": "object",
+                    "unique_values": [
+                        "Brand Equity",
+                        "Brand Image Profiles (excluding any negative statements)",
+                        "Respondent Sample Size",
+                        "Consumer Typology",
+                        "Demand Power Index",
+                        "Market factors - Share flow",
+                        "Demand Power Regression",
+                        "Pricing Power Regression",
+                        "Gender",
+                        "Age Bands",
+                        "Unaided Awareness - First Mention",
+                        "Unaided Awareness - Total Mentions",
+                        "Familiarity",
+                        "PRV. Province",
+                        "MHI. Household Income",
+                        "SSEM_OUTPUT5. 5 Supergroup SEM output",
+                        "ETH. Ethnic Group",
+                        "Affinity",
+                        "Unique",
+                        "Meets Needs",
+                        "Dynamic",
+                        "Price",
+                        "Worth",
+                        "Imagery",
+                        "Total Brand Communication Awareness - Media"
+                    ]
+                },
+                {
+                    "name": "KPI",
+                    "type": "object",
+                    "unique_values": null
+                },
+                {
+                    "name": "value",
+                    "type": "float64",
+                    "unique_values": null
+                },
+                {
+                    "name": "Time_Period",
+                    "type": "object",
+                    "unique_values": [
+                        "H2 F25",
+                        "H1 F25",
+                        "H2 F24",
+                        "H2 F23",
+                        "H1 F23"
+                    ]
+                },
+                {
+                    "name": "Datacut",
+                    "type": "object",
+                    "unique_values": [
+                        "Total",
+                        "Male",
+                        "Female",
+                        "18 - 24 Years",
+                        "25 - 34 Years",
+                        "35 + Years",
+                        "Eastern Cape",
+                        "Gauteng",
+                        "KZN",
+                        "Western Cape",
+                        "NWLPMP",
+                        "SEM 2-4",
+                        "SEM 5",
+                        "SEM 2-3",
+                        "SEM 4",
+                        "WCI",
+                        "Black",
+                        "Up to R10 000",
+                        "SEM 4-5",
+                        "More than R24000",
+                        "Up to R24000",
+                        "R10 001 - R24 000",
+                        "Free State"
+                    ]
+                }
+            ]
+        }
+    ]
+}

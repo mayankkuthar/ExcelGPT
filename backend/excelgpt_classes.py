@@ -26,28 +26,38 @@ class Config:
         # Go up one level to get to project root
         base_dir = Path(__file__).resolve().parent.parent
 
+        # For Vercel, files are copied to the same directory as the handler
+        # So we need to check both the expected paths and the current directory
+        current_dir = Path(__file__).resolve().parent  # backend directory
+        
         # Try multiple possible paths for the data files
         possible_paths = [
             base_dir / "CONSOLIDATED_OUTPUT_DATA.csv",  # Project root
+            current_dir / "CONSOLIDATED_OUTPUT_DATA.csv",  # Backend directory (for Vercel)
             Path("../CONSOLIDATED_OUTPUT_DATA.csv"),  # Relative fallback
             Path("CONSOLIDATED_OUTPUT_DATA.csv"),      # Current directory
             Path("/tmp/CONSOLIDATED_OUTPUT_DATA.csv"), # Vercel temp directory
+            Path("/var/task/CONSOLIDATED_OUTPUT_DATA.csv"), # Vercel lambda directory
         ]
         self.data_file_path = self._find_file(possible_paths, "CONSOLIDATED_OUTPUT_DATA.csv")
         
         possible_summary_paths = [
             base_dir / "db_summary.json",              # Project root
+            current_dir / "db_summary.json",           # Backend directory (for Vercel)
             Path("../db_summary.json"),              # Relative fallback
             Path("db_summary.json"),                 # Current directory
             Path("/tmp/db_summary.json"),            # Vercel temp directory
+            Path("/var/task/db_summary.json"),       # Vercel lambda directory
         ]
         self.db_summary_path = self._find_file(possible_summary_paths, "db_summary.json")
         
         possible_mapping_paths = [
             base_dir / "context_kpi_mapping.json",     # Project root
+            current_dir / "context_kpi_mapping.json",  # Backend directory (for Vercel)
             Path("../context_kpi_mapping.json"),     # Relative fallback
             Path("context_kpi_mapping.json"),        # Current directory
             Path("/tmp/context_kpi_mapping.json"),   # Vercel temp directory
+            Path("/var/task/context_kpi_mapping.json"), # Vercel lambda directory
         ]
         self.kpi_mapping_path = self._find_file(possible_mapping_paths, "context_kpi_mapping.json")
 
@@ -64,10 +74,14 @@ class Config:
     def _find_file(self, possible_paths, filename):
         """Find a file in multiple possible locations"""
         for path in possible_paths:
+            print(f"🔍 Checking for {filename} at: {path}")
             if path.exists():
                 print(f"✅ Found {filename} at: {path}")
                 return path
-        print(f"❌ Could not find {filename} in any of these locations: {possible_paths}")
+        print(f"❌ Could not find {filename} in any of these locations: {[str(p) for p in possible_paths]}")
+        # Return the most likely path for Vercel as fallback
+        if self.is_vercel:
+            return Path(f"/var/task/{filename}")
         return possible_paths[0]  # Return the first path as fallback
 
     def validate(self):
@@ -97,17 +111,21 @@ class DataLoader:
         """Loads all data sources and returns True if successful."""
         try:
             print(f"⏳ Loading main data from '{self.config.data_file_path}'...")
+            print(f"📁 Current working directory: {Path.cwd()}")
+            print(f"📂 File exists: {self.config.data_file_path.exists()}")
             self.df = pd.read_csv(self.config.data_file_path)
             print(
                 f"✅ Successfully loaded main data ({self.df.shape[0]} rows, {self.df.shape[1]} columns)."
             )
 
             print(f"⏳ Loading DB summary from '{self.config.db_summary_path}'...")
+            print(f"📁 File exists: {self.config.db_summary_path.exists()}")
             with open(self.config.db_summary_path, "r") as f:
                 self.db_summary = json.load(f)
             print("✅ Successfully loaded DB summary.")
 
             print(f"⏳ Loading KPI mapping from '{self.config.kpi_mapping_path}'...")
+            print(f"📁 File exists: {self.config.kpi_mapping_path.exists()}")
             with open(self.config.kpi_mapping_path, "r") as f:
                 self.kpi_mapping = json.load(f)
             print("✅ Successfully loaded KPI mapping.")
