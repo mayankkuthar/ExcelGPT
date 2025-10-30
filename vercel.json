@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/main_websocket.py",
+      "src": "backend/main.py",
       "use": "@vercel/python",
       "config": {
         "maxDuration": 60

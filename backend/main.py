@@ -27,15 +27,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://excel-gpt-insight-96kkvef5b-mayank-kuthar.vercel.app",
-        "https://excel-gpt-insight-55urplkq0-mayank-kuthars-projects.vercel.app",
-        "https://excel-gpt-frontend.vercel.app",
-        "https://excelgpt-frontend.vercel.app",
-        "https://*.vercel.app"  # Allow all Vercel apps
+        "https://excel-gpt-insight.vercel.app",
+        "https://*.vercel.app",
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Global variables for managing data

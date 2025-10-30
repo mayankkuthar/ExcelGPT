@@ -12,7 +12,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/main_websocket.py"
+      "destination": "/main.py"
     }
   ]
 }
