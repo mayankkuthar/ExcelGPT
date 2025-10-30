@@ -32,13 +32,13 @@ function App() {
       let wsUrl;
       if (window.location.hostname.includes('vercel.app')) {
         // For Vercel deployment, use the backend domain
-        const backendUrl = API_BASE_URL.replace('https://', 'wss://');
+        const backendUrl = BACKEND_URL.replace('https://', 'wss://');
         const clientId = Math.random().toString(36).substr(2, 9);
         wsUrl = `${backendUrl}/ws/${clientId}`;
       } else {
         // For local development
         const clientId = Math.random().toString(36).substr(2, 9);
-        wsUrl = `${API_BASE_URL.replace('http', 'ws')}/ws/${clientId}`;
+        wsUrl = `${BACKEND_URL.replace('http', 'ws')}/ws/${clientId}`;
       }
 
       console.log('Attempting to connect to WebSocket:', wsUrl);
