@@ -17,5 +17,11 @@
   ],
   "env": {
     "REACT_APP_API_URL": "https://excel-gpt-zeta.vercel.app"
-  }
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://excel-gpt-zeta.vercel.app/"
+    }
+  ]
 }

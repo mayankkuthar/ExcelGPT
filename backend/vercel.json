@@ -2,23 +2,23 @@
   "version": 2,
   "builds": [
     {
-      "src": "main.py",
+      "src": "main_websocket.py",
       "use": "@vercel/python",
       "config": {
         "maxDuration": 60,
         "includeFiles": [
-          "../CONSOLIDATED_OUTPUT_DATA.csv",
-          "../db_summary.json",
-          "../context_kpi_mapping.json"
-        ]
+          "CONSOLIDATED_OUTPUT_DATA.csv",
+          "db_summary.json",
+          "context_kpi_mapping.json"
+        ],
+        "runtime": "python3.9"
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "main.py"
+      "dest": "main_websocket.py"
     }
   ]
-  
 }

@@ -152,8 +152,12 @@ async def trigger_init():
 @app.get("/data/info")
 async def get_data_info():
     """Get information about the loaded dataset"""
-    if not manager.initialized:
+    if not manager.initialized or manager.data_loader is None:
         raise HTTPException(status_code=503, detail="ExcelGPT not initialized")
+    
+    # Check if required data is loaded
+    if manager.data_loader.df is None or manager.data_loader.kpi_mapping is None:
+        raise HTTPException(status_code=503, detail="Required data not loaded")
     
     return {
         "dataset_shape": manager.data_loader.df.shape,
@@ -182,7 +186,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
 async def handle_analysis_query(websocket: WebSocket, query: str):
     """Handle analysis query from client"""
-    if not manager.initialized:
+    if not manager.initialized or manager.data_loader is None or manager.agent is None:
         await manager.send_personal_message(
             json.dumps({
                 "type": "error",
@@ -203,7 +207,17 @@ async def handle_analysis_query(websocket: WebSocket, query: str):
             websocket
         )
 
-        # Prepare context strings
+        # Prepare context strings - add null checks
+        if manager.data_loader.db_summary is None or manager.data_loader.kpi_mapping is None:
+            await manager.send_personal_message(
+                json.dumps({
+                    "type": "error",
+                    "message": "Required data not loaded properly."
+                }), 
+                websocket
+            )
+            return
+
         db_summary_str = json.dumps(manager.data_loader.db_summary, indent=2)
         kpi_mapping_str = json.dumps(manager.data_loader.kpi_mapping, indent=2)
 

@@ -4,7 +4,10 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://excel-gpt-zeta.vercel.app';
+// Updated API_BASE_URL to handle both local and Vercel environments correctly
+const API_BASE_URL = process.env.REACT_APP_API_URL || (window.location.hostname.includes('vercel.app') 
+  ? `https://${window.location.hostname.replace('excelgpt-frontend', 'excel-gpt-zeta')}` 
+  : 'http://localhost:8000');
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -25,8 +28,21 @@ function App() {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const clientId = Math.random().toString(36).substr(2, 9);
-      const ws = new WebSocket(`${API_BASE_URL.replace('http', 'ws')}/ws/${clientId}`);
+      // Create WebSocket URL based on current environment
+      let wsUrl;
+      if (window.location.hostname.includes('vercel.app')) {
+        // For Vercel deployment, use the backend domain
+        const backendUrl = API_BASE_URL.replace('https://', 'wss://');
+        const clientId = Math.random().toString(36).substr(2, 9);
+        wsUrl = `${backendUrl}/ws/${clientId}`;
+      } else {
+        // For local development
+        const clientId = Math.random().toString(36).substr(2, 9);
+        wsUrl = `${API_BASE_URL.replace('http', 'ws')}/ws/${clientId}`;
+      }
+
+      console.log('Attempting to connect to WebSocket:', wsUrl);
+      const ws = new WebSocket(wsUrl);
       
       wsRef.current = ws;
 
