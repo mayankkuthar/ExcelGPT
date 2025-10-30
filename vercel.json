@@ -21,18 +21,14 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/backend/main_websocket.py"
+      "source": "/api/(.*)",
+      "destination": "/backend/main_websocket.py"
     },
     {
-      "src": "/ws/(.*)",
-      "dest": "/backend/main_websocket.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "source": "/ws/(.*)",
+      "destination": "/backend/main_websocket.py"
     }
   ],
   "env": {
