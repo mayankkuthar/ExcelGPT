@@ -23,23 +23,23 @@ class Config:
 
         # Try multiple possible paths for the data files
         possible_paths = [
-            Path("CONSOLIDATED_OUTPUT_DATA.csv"),
-            Path("../CONSOLIDATED_OUTPUT_DATA.csv"),
-            Path("/tmp/CONSOLIDATED_OUTPUT_DATA.csv"),
+            Path("../CONSOLIDATED_OUTPUT_DATA.csv"),  # Parent directory (when running from backend/)
+            Path("CONSOLIDATED_OUTPUT_DATA.csv"),      # Current directory
+            Path("/tmp/CONSOLIDATED_OUTPUT_DATA.csv"), # Vercel temp directory
         ]
         self.data_file_path = self._find_file(possible_paths, "CONSOLIDATED_OUTPUT_DATA.csv")
         
         possible_summary_paths = [
-            Path("db_summary.json"),
-            Path("../db_summary.json"),
-            Path("/tmp/db_summary.json"),
+            Path("../db_summary.json"),              # Parent directory (when running from backend/)
+            Path("db_summary.json"),                 # Current directory
+            Path("/tmp/db_summary.json"),            # Vercel temp directory
         ]
         self.db_summary_path = self._find_file(possible_summary_paths, "db_summary.json")
         
         possible_mapping_paths = [
-            Path("context_kpi_mapping.json"),
-            Path("../context_kpi_mapping.json"),
-            Path("/tmp/context_kpi_mapping.json"),
+            Path("../context_kpi_mapping.json"),     # Parent directory (when running from backend/)
+            Path("context_kpi_mapping.json"),        # Current directory
+            Path("/tmp/context_kpi_mapping.json"),   # Vercel temp directory
         ]
         self.kpi_mapping_path = self._find_file(possible_mapping_paths, "context_kpi_mapping.json")
 
