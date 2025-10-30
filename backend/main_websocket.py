@@ -25,10 +25,16 @@ app = FastAPI(title="ExcelGPT API", version="1.0.0")
 # CORS middleware for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for testing
+    allow_origins=[
+        "http://localhost:3000",
+        "https://excel-gpt-insight.vercel.app",
+        "https://*.vercel.app",
+        "*"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Global variables for managing connections and data
@@ -118,6 +124,17 @@ async def startup_event():
 async def root():
     return {"message": "ExcelGPT API is running!", "status": "healthy"}
 
+@app.options("/health")
+async def health_options():
+    return JSONResponse(
+        content={"message": "OK"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
+
 @app.get("/health")
 async def health_check():
     resp = {
@@ -134,6 +151,17 @@ async def health_check():
     return resp
 
 
+@app.options("/init")
+async def init_options():
+    return JSONResponse(
+        content={"message": "OK"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
+
 @app.post("/init")
 async def trigger_init():
     """Trigger initialization manually and return the outcome (for diagnostics)."""
@@ -148,6 +176,17 @@ async def trigger_init():
         "initialization_completed_at": manager.initialization_completed_at,
         "initialization_traceback": manager.initialization_traceback if manager.initialization_status == "failed" else None,
     }
+
+@app.options("/data/info")
+async def data_info_options():
+    return JSONResponse(
+        content={"message": "OK"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
 
 @app.get("/data/info")
 async def get_data_info():
