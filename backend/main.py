@@ -272,8 +272,8 @@ async def get_result(request_id: str):
 async def execute_analysis_code(code: str):
     """Execute the generated analysis code"""
     try:
-        # Create a temporary file for the code
-        temp_file = f"temp_analysis_{uuid.uuid4().hex}.py"
+        # Use /tmp directory for Vercel serverless environment
+        temp_file = f"/tmp/temp_analysis_{uuid.uuid4().hex}.py"
         
         # Write code to file
         with open(temp_file, 'w') as f:
@@ -288,7 +288,10 @@ async def execute_analysis_code(code: str):
         )
         
         # Clean up temp file
-        os.remove(temp_file)
+        try:
+            os.remove(temp_file)
+        except:
+            pass  # Ignore cleanup errors
         
         if result.returncode == 0:
             return {"success": True, "output": result.stdout}
