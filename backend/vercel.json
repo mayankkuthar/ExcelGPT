@@ -2,17 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "main_websocket.py",
+      "src": "*.py",
       "use": "@vercel/python",
       "config": {
-        "maxDuration": 60,
-        "includeFiles": [
-          "CONSOLIDATED_OUTPUT_DATA.csv",
-          "db_summary.json",
-          "context_kpi_mapping.json"
-        ],
-        "runtime": "python3.9"
+        "maxDuration": 60
       }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/main_websocket.py"
     }
   ]
 }

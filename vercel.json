@@ -2,33 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    },
-    {
       "src": "backend/main_websocket.py",
       "use": "@vercel/python",
       "config": {
-        "maxDuration": 60,
-        "includeFiles": [
-          "backend/CONSOLIDATED_OUTPUT_DATA.csv",
-          "backend/db_summary.json",
-          "backend/context_kpi_mapping.json"
-        ]
+        "maxDuration": 60
       }
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/backend/main_websocket.py"
-    },
-    {
-      "source": "/ws/(.*)",
-      "destination": "/backend/main_websocket.py"
     }
   ],
   "env": {
