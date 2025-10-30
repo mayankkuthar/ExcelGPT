@@ -21,23 +21,31 @@ class Config:
         # Detect Vercel environment to handle filesystem restrictions
         self.is_vercel = os.getenv('VERCEL', '0') == '1'
 
+        # Get the absolute path to the project root
+        # __file__ is the current file (excelgpt_classes.py in backend/)
+        # Go up one level to get to project root
+        base_dir = Path(__file__).resolve().parent.parent
+
         # Try multiple possible paths for the data files
         possible_paths = [
-            Path("../CONSOLIDATED_OUTPUT_DATA.csv"),  # Parent directory (when running from backend/)
+            base_dir / "CONSOLIDATED_OUTPUT_DATA.csv",  # Project root
+            Path("../CONSOLIDATED_OUTPUT_DATA.csv"),  # Relative fallback
             Path("CONSOLIDATED_OUTPUT_DATA.csv"),      # Current directory
             Path("/tmp/CONSOLIDATED_OUTPUT_DATA.csv"), # Vercel temp directory
         ]
         self.data_file_path = self._find_file(possible_paths, "CONSOLIDATED_OUTPUT_DATA.csv")
         
         possible_summary_paths = [
-            Path("../db_summary.json"),              # Parent directory (when running from backend/)
+            base_dir / "db_summary.json",              # Project root
+            Path("../db_summary.json"),              # Relative fallback
             Path("db_summary.json"),                 # Current directory
             Path("/tmp/db_summary.json"),            # Vercel temp directory
         ]
         self.db_summary_path = self._find_file(possible_summary_paths, "db_summary.json")
         
         possible_mapping_paths = [
-            Path("../context_kpi_mapping.json"),     # Parent directory (when running from backend/)
+            base_dir / "context_kpi_mapping.json",     # Project root
+            Path("../context_kpi_mapping.json"),     # Relative fallback
             Path("context_kpi_mapping.json"),        # Current directory
             Path("/tmp/context_kpi_mapping.json"),   # Vercel temp directory
         ]
